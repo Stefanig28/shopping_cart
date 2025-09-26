@@ -1,10 +1,6 @@
 //Version 1
 
 <script>
-	const shopDomain = "bu1fib-rq.myshopify.com";
-  const storefrontToken = "83e93e5462232411b85e227dad586a69";
-  const apiUrl = `https://${shopDomain}/api/2024-10/graphql.json`;
-  
   let cart = [];
   
   const cartList = document.getElementById("cart-list");
