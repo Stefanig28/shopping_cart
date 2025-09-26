@@ -1,0 +1,90 @@
+<script>
+	const shopDomain = "bu1fib-rq.myshopify.com";
+  const storefrontToken = "83e93e5462232411b85e227dad586a69";
+  const apiUrl = `https://${shopDomain}/api/2024-10/graphql.json`;
+  
+  const variantId = `gid://shopify/ProductVariant/46805481881826`;
+  
+  async function shopifyRequest(query, variables = {}) {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": storefrontToken,
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const data = await response.json();
+    return data;
+  }
+
+  async function createCart() {
+    const mutation = `
+      mutation CreateCart($input: CartInput!) {
+        cartCreate(input: $input) {
+          cart {
+            id
+            createdAt
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      input: {
+        lines: [
+          {
+            merchandiseId: variantId,
+            quantity: 1
+          },
+        ]
+      }
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartCreate.userErrors.length > 0) {
+      console.error("GraphQL Errors:", result.errors || result.data.cartCreate.userErrors);
+      throw new Error("Failed to create cart");
+    }
+
+    const cart = result.data.cartCreate.cart;
+    console.log("Cart Created", cart);
+    console.log("Cart ID:", cart.id);
+  }
+  
+  createCart();
+
+	document.addEventListener("DOMContentLoaded", () => {
+    const cartBtn = document.getElementById('cart-button')
+    const cartItemsContainer = document.getElementById('cart-items')
+    const emptyCartMessage = document.getElementById('empty-cart-message')
+    
+    cartBtn.addEventListener('click', () => {
+			showCart()
+    })
+  });
+</script>
