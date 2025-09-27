@@ -40,3 +40,8 @@ Añade el item al carrito segun la variante que tenga el boton
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-27 at 3 17 24 PM" src="https://github.com/user-attachments/assets/9dea6de1-fdb1-45f3-b813-a4302239f106" />
 
+**Version 9**
+
+Añade los items solo si estan en stock, sino me muestra un mensaje de "No stock available"
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-27 at 3 54 47 PM" src="https://github.com/user-attachments/assets/f076fa65-50bb-4dcd-946f-e00faf5f14cc" />
