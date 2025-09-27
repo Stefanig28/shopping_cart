@@ -21,3 +21,9 @@ Crea un carrito vacio, y tambien añade items al carrito.
 Muestra Cart en consola 
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-26 at 3 52 48 PM" src="https://github.com/user-attachments/assets/16e00c61-c330-4d5f-a4a8-793989d5c798" />
+
+**Version 6**
+
+Cuando le doy click al boton Cart me abre un modal en blanco un el item agregado 
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-27 at 9 28 36 AM" src="https://github.com/user-attachments/assets/14ca3a4d-2abc-49a3-9254-044c0896f421" />
