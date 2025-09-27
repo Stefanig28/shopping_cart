@@ -52,3 +52,10 @@ Muestra un mensaje de exito cuando se añade al carrito
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-27 at 4 12 21 PM" src="https://github.com/user-attachments/assets/9a6b7720-c626-40fc-b76f-a93550494ba2" />
 
+**Version 11**
+
+Mejore el diseño del carrito
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-27 at 5 16 02 PM" src="https://github.com/user-attachments/assets/7345d406-02ed-4652-bdd6-3c4c942f7610" />
+
+
