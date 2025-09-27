@@ -1,0 +1,242 @@
+<script>
+	const shopDomain = "bu1fib-rq.myshopify.com";
+  const storefrontToken = "83e93e5462232411b85e227dad586a69";
+  const apiUrl = `https://${shopDomain}/api/2024-10/graphql.json`;
+  
+  const variantId = `gid://shopify/ProductVariant/46880650297570`;
+  
+  async function shopifyRequest(query, variables = {}) {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": storefrontToken,
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const data = await response.json();
+    return data;
+  }
+
+  async function createCart() {
+    const mutation = `
+      mutation CreateCart($input: CartInput!) {
+        cartCreate(input: $input) {
+          cart {
+            id
+            createdAt
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+    
+		const variables = {
+      input: {} 
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartCreate.userErrors.length > 0) {
+      console.error("GraphQL Errors:", result.errors || result.data.cartCreate.userErrors);
+      throw new Error("Failed to create cart");
+    }
+
+    const cart = result.data.cartCreate.cart;
+    console.log("Cart ID:", cart.id);
+    
+    return cart.id
+  }
+  
+  async function getCart(cartId) {
+  	  const query = `
+        query GetCart($cartId: ID!) {
+          cart(id: $cartId) {
+            id
+            createdAt
+            updatedAt
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      product {
+                        title
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            cost {
+              totalAmount {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+      `;
+      
+    const variables = { cartId };
+      
+		const result = await shopifyRequest(query, variables);
+    
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      throw new Error("Failed to fetch cart.");
+  	}
+		
+    console.log("Get Cart", result.data.cart)
+  	return result.data.cart;
+  }
+  
+  async function addItemToCart(cartId, variantId, quantity = 1) {
+    const mutation = `
+      mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+        cartLinesAdd(cartId: $cartId, lines: $lines) {
+          cart {
+            id
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      cartId,
+      lines: [
+        {
+          merchandiseId: variantId,
+          quantity
+        }
+      ]
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartLinesAdd.userErrors.length > 0) {
+      console.error("GraphQL Errors:", result.errors || result.data.cartLinesAdd.userErrors);
+      throw new Error("Failed to add item to cart");
+    }
+		
+    const updatedCart = result.data.cartLinesAdd.cart;
+    console.log("Item added to cart", updatedCart);
+    return updatedCart;
+  }
+  
+  async function showCart(cartId) {
+    const cart = await getCart(cartId);
+    const cartModal = document.getElementById('cart-modal');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const emptyCartMessage = document.getElementById('empty-cart-message');
+
+    cartItemsContainer.innerHTML = '';
+
+    if (!cart || !cart.lines || cart.lines.edges.length === 0) {
+      emptyCartMessage.style.display = 'block';
+      return;
+    } else {
+      emptyCartMessage.style.display = 'none';
+    }
+
+    cart.lines.edges.forEach(edge => {
+      const item = edge.node;
+      const variant = item.merchandise;
+
+      const productTitle = variant.product?.title || 'Producto sin nombre';
+      const variantTitle = variant.title || '';
+      const quantity = item.quantity;
+      const price = parseFloat(variant.price.amount);
+      const currency = variant.price.currencyCode;
+      const total = (price * quantity).toFixed(2);
+
+      const listItem = document.createElement('div');
+      listItem.classList.add('cart-item');
+
+      listItem.textContent = `${productTitle} - ${variantTitle} | Cantidad: ${quantity} | Precio unitario: $${price} ${currency} | Total: $${total}`;
+
+      cartItemsContainer.appendChild(listItem);
+    });
+
+    const totalAmount = cart.cost.totalAmount.amount;
+    const currency = cart.cost.totalAmount.currencyCode;
+
+    const totalDiv = document.createElement('div');
+    totalDiv.classList.add('cart-total');
+    totalDiv.textContent = `Total del carrito: $${totalAmount} ${currency}`;
+    cartItemsContainer.appendChild(totalDiv);
+    
+    if (cartModal) {
+      cartModal.style.display = "flex";
+    } else {
+      console.warn("cartList no encontrado en el DOM");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const cartBtn = document.getElementById('cart-button');
+    const addToCartBtn = document.getElementById('add-to-cart-button');
+
+    const cartId = await createCart(); 
+
+    addToCartBtn.addEventListener('click', async () => {
+      await addItemToCart(cartId, variantId, 1);
+      console.log("Producto añadido");
+    });
+
+    cartBtn.addEventListener('click', async () => {
+      showCart(cartId);
+    });
+  });
+
+</script>
