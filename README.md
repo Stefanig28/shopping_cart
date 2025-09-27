@@ -45,3 +45,10 @@ Añade el item al carrito segun la variante que tenga el boton
 Añade los items solo si estan en stock, sino me muestra un mensaje de "No stock available"
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-27 at 3 54 47 PM" src="https://github.com/user-attachments/assets/f076fa65-50bb-4dcd-946f-e00faf5f14cc" />
+
+**Verson 10**
+
+Muestra un mensaje de exito cuando se añade al carrito 
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-27 at 4 12 21 PM" src="https://github.com/user-attachments/assets/9a6b7720-c626-40fc-b76f-a93550494ba2" />
+
