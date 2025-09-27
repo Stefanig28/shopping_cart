@@ -34,3 +34,9 @@ Cuando le doy click al boton de añadir al carrito, añade el item al carrito
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-27 at 2 44 10 PM" src="https://github.com/user-attachments/assets/945946f5-0a6e-4be8-a8b3-384c7106d3a0" />
 
+**Version 8**
+
+Añade el item al carrito segun la variante que tenga el boton
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-27 at 3 17 24 PM" src="https://github.com/user-attachments/assets/9dea6de1-fdb1-45f3-b813-a4302239f106" />
+
