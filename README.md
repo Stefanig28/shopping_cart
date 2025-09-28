@@ -87,3 +87,7 @@ Esta version añade al carrito correctamente desde el code embed, y desde el hom
 **Version 17**
 
 Muestra el carrito
+
+**Version 18**
+
+Checkout 
