@@ -70,3 +70,8 @@ Añadi el contador
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-28 at 9 34 14 AM" src="https://github.com/user-attachments/assets/4949c8e9-b69d-4327-8a01-c6bd102bdc45" />
 
+**Version 14**
+
+En lugar de poner el codigo desde el before body lo pusimos con un code embed anidado al "boton" de añadir al carrito. Pero el id del carrito esta conectado al id del producto, entonces cada div esta creando un carrito distinto.
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-28 at 2 48 57 PM" src="https://github.com/user-attachments/assets/12b3d151-5058-4af7-bfc9-50c812761edc" />
