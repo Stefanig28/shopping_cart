@@ -58,4 +58,9 @@ Mejore el diseño del carrito
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-27 at 5 16 02 PM" src="https://github.com/user-attachments/assets/7345d406-02ed-4652-bdd6-3c4c942f7610" />
 
+**Version 12**
+
+Agregue la funcionalidad del boton de checkout
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-28 at 7 53 54 AM" src="https://github.com/user-attachments/assets/6fa5cd0d-85a7-4758-832f-3c8be4b07658" />
 
