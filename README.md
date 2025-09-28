@@ -79,3 +79,7 @@ En lugar de poner el codigo desde el before body lo pusimos con un code embed an
 **Version 15**
 
 El problema con el codigo del code embed es que se ejecutaba primero y no estaba creado el carrito todavia, entonces pusimos un timeout para que esperara unos segundos y se ejecutara despues, y asi primero se crea el carrito y despues se puede añadir cosas en el.
+
+**Version 16**
+
+Esta version añade al carrito correctamente desde el code embed, y desde el home lo muestra en los logs
