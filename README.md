@@ -64,3 +64,9 @@ Agregue la funcionalidad del boton de checkout
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-28 at 7 53 54 AM" src="https://github.com/user-attachments/assets/6fa5cd0d-85a7-4758-832f-3c8be4b07658" />
 
+**Version 13**
+
+Añadi el contador 
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-28 at 9 34 14 AM" src="https://github.com/user-attachments/assets/4949c8e9-b69d-4327-8a01-c6bd102bdc45" />
+
