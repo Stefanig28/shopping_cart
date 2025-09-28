@@ -75,3 +75,7 @@ Añadi el contador
 En lugar de poner el codigo desde el before body lo pusimos con un code embed anidado al "boton" de añadir al carrito. Pero el id del carrito esta conectado al id del producto, entonces cada div esta creando un carrito distinto.
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-28 at 2 48 57 PM" src="https://github.com/user-attachments/assets/12b3d151-5058-4af7-bfc9-50c812761edc" />
+
+**Version 15**
+
+El problema con el codigo del code embed es que se ejecutaba primero y no estaba creado el carrito todavia, entonces pusimos un timeout para que esperara unos segundos y se ejecutara despues, y asi primero se crea el carrito y despues se puede añadir cosas en el.
