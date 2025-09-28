@@ -1,0 +1,15 @@
+<div  
+  class="buy-button"
+  id="buy-button-{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+><p>oh my dear {{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}</p>
+</div>
+<script>  
+  document.addEventListener("DOMContentLoaded", async () => {
+  setTimeout( async () => {
+  	console.log("Hey this is cart id", window.cartId);
+    
+  }, 2000); 
+  
+  });
+
+</script>
