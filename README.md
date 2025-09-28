@@ -91,3 +91,7 @@ Muestra el carrito
 **Version 18**
 
 Checkout 
+
+**Version 19**
+
+Falta verificar el stock
