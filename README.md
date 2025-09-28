@@ -83,3 +83,7 @@ El problema con el codigo del code embed es que se ejecutaba primero y no estaba
 **Version 16**
 
 Esta version añade al carrito correctamente desde el code embed, y desde el home lo muestra en los logs
+
+**Version 17**
+
+Muestra el carrito
