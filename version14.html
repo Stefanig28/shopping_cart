@@ -1,0 +1,252 @@
+<div  
+  class="buy-button"
+  id="buy-button-{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+><p>oh my dear {{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}</p>
+</div>
+<script>  
+  async function shopifyRequest(query, variables = {}) {
+    const response = await fetch("https://bu1fib-rq.myshopify.com/api/2024-10/graphql.json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": "83e93e5462232411b85e227dad586a69",
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const data = await response.json();
+    return data;
+  }
+
+  async function createCart() {
+    const mutation = `
+      mutation CreateCart($input: CartInput!) {
+        cartCreate(input: $input) {
+          cart {
+            id
+            checkoutUrl
+            createdAt
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+    
+		const variables = {
+      input: {} 
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartCreate.userErrors.length > 0) {
+      console.error("GraphQL Errors:", result.errors || result.data.cartCreate.userErrors);
+      throw new Error("Failed to create cart");
+    }
+    return result.data.cartCreate.cart.id
+  }
+  
+  async function getCart(cartId) {
+  	  const query = `
+        query GetCart($cartId: ID!) {
+          cart(id: $cartId) {
+            id
+            createdAt
+            updatedAt
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      product {
+                        title
+                        featuredImage {
+                          url
+                          altText
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            cost {
+              totalAmount {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+      `;
+      
+    const variables = { cartId };
+      
+		const result = await shopifyRequest(query, variables);
+    
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      throw new Error("Failed to fetch cart.");
+  	}
+		
+    console.log("Get Cart", result.data.cart)
+  	return result.data.cart;
+  }
+  
+  async function addItemToCart(cartId, variantId, quantity = 1) {
+
+    const mutation = `
+      mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+        cartLinesAdd(cartId: $cartId, lines: $lines) {
+          cart {
+            id
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      cartId,
+      lines: [
+        {
+          merchandiseId: `gid://shopify/ProductVariant/${variantId}`,
+          quantity
+        }
+      ]
+    };
+
+   
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartLinesAdd.userErrors.length > 0) {
+      console.error("GraphQL Errors:", result.errors || result.data.cartLinesAdd.userErrors);
+      throw new Error("Failed to add item to cart");
+    }
+		
+    const updatedCart = result.data.cartLinesAdd.cart;
+    console.log("Item added to cart", updatedCart);
+    showToast("Product added successfully", "success");
+    return updatedCart.totalQuantity;
+  }
+  
+  function showToast(message, type = 'error') {
+    const existingToast = document.getElementById('toast-notification');
+    if (existingToast) {
+      existingToast.remove();
+    }
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-notification';
+    toast.textContent = message;
+
+    toast.style.position = 'fixed';
+    toast.style.top = '30px';
+    toast.style.right = '30px';
+    toast.style.padding = '14px 20px';
+    toast.style.backgroundColor = type === 'error' ? '#ff4d4f' : '#4caf50';
+    toast.style.color = '#fff';
+    toast.style.borderRadius = '8px';
+    toast.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    toast.style.fontSize = '16px';
+    toast.style.zIndex = '9999';
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    toast.style.transform = 'translateY(20px)';
+
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px)';
+      setTimeout(() => {
+        toast.remove();
+      }, 400);
+    }, 3000);
+  }
+
+  async function showCart(cartId) {
+    console.log(cartId);
+    const cart = await getCart(cartId);
+    console.log(cart);
+    // const cartModal = document.getElementById('cart-modal');
+  }
+
+  function updateCartCounter(count) {
+    const counterEl = document.getElementById('cart-counter');
+    counterEl.textContent = count;
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const cartId = await createCart();
+    console.log("cartId", cartId);
+    updateCartCounter(0)
+    
+    const cartBtn = document.getElementById('cart-button');
+    const checkoutBtn = document.getElementById('checkout-button');
+    const buyButton = document.getElementById(`buy-button-{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`);
+
+    buyButton.addEventListener('click', async () => {
+      const totalQuantity = await addItemToCart(cartId, `{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`, 1);
+      updateCartCounter(totalQuantity);
+    });
+
+    cartBtn.addEventListener('click', async () => {
+      showCart(cartId);
+    });
+  });
+
+</script>
