@@ -94,4 +94,4 @@ Checkout
 
 **Version 19**
 
-Falta verificar el stock
+Verifica el stock 
