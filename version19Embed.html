@@ -68,7 +68,6 @@
 		
     const updatedCart = result.data.cartLinesAdd.cart;
     console.log("Item added to cart", updatedCart);
-    showToast("Product added successfully", "success");
     return updatedCart.totalQuantity;
   }
   
@@ -218,23 +217,28 @@
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
-  setTimeout( async () => {
-  	updateCartCounter(0)
-  	console.log("Hey this is cart id", window.cartId);
-    
-   	const buyButton = document.getElementById(`buy-button-{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`);
-    buyButton.addEventListener('click', async () => {
-    		const currentCount = await getTotalCount(window.cartId);
-      	const totalCount = await addItemToCart(window.cartId, `{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`, 1)
-        if (currentCount == totalCount) {
-						const stock = checkVariantStock(`{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`);
-            if (stock.quantityAvailable == 0) {
+    setTimeout( async () => {
+      updateCartCounter(0)
+      console.log("Hey this is cart id", window.cartId);
+
+      const buyButton = document.getElementById(`buy-button-{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`);
+
+      buyButton.addEventListener('click', async () => {
+          const currentCount = await getTotalCount(window.cartId);
+          const totalCount = await addItemToCart(window.cartId, `{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`, 1)
+
+          if (currentCount === totalCount) {
+            const stock = await checkVariantStock(`gid://shopify/ProductVariant/{{wf {&quot;path&quot;:&quot;product-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`);
+            console.log(stock)
+            if (!stock || stock.quantityAvailable === 0 || stock.availableForSale === false) {
                showToast("Not enough stock for product");
-               return
             }
-        }
-        showToast("Added to the cart")
-    });
+            return;
+					}
+          updateCartCounter(totalCount);
+      		showToast("Product added successfully", "success");
+      });
+
     }, 2000); 
   });
 
