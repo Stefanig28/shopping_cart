@@ -113,3 +113,9 @@ Virifica stock y si no hay muestra un mensaje de alerta desde el carrito
 Agregue la funcion removeLine para poder eliminar el producto del carrito por completo
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-29 at 4 59 25 PM" src="https://github.com/user-attachments/assets/b8ee7d1c-df98-4918-a8e1-a9b8a35e0077" />
+
+**Version 23**
+
+Volvi scrolleable el carrito
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-29 at 6 42 06 PM" src="https://github.com/user-attachments/assets/2dea28c4-4a2f-4090-b83a-86ba49917500" />
