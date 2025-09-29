@@ -104,4 +104,6 @@ Agregue los botones de mas y menos en el carrito
 
 **Version 21**
 
+Virifica stock y si no hay muestra un mensaje de alerta desde el carrito 
+
 <img width="1680" height="1050" alt="Screenshot 2025-09-29 at 4 34 49 PM" src="https://github.com/user-attachments/assets/123df83c-ba03-4e2f-a309-7172a56f3b3c" />
