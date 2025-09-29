@@ -98,5 +98,7 @@ Verifica el stock
 
 **Version 20**
 
+Agregue los botones de mas y menos en el carrito
+
 <img width="1680" height="1050" alt="Screenshot 2025-09-29 at 11 25 07 AM" src="https://github.com/user-attachments/assets/25d0fc11-6c48-449c-b712-b3b3edb490a7" />
 
