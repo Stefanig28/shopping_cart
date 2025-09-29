@@ -102,3 +102,6 @@ Agregue los botones de mas y menos en el carrito
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-29 at 11 25 07 AM" src="https://github.com/user-attachments/assets/25d0fc11-6c48-449c-b712-b3b3edb490a7" />
 
+**Version 21**
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-29 at 4 34 49 PM" src="https://github.com/user-attachments/assets/123df83c-ba03-4e2f-a309-7172a56f3b3c" />
