@@ -107,3 +107,9 @@ Agregue los botones de mas y menos en el carrito
 Virifica stock y si no hay muestra un mensaje de alerta desde el carrito 
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-29 at 4 34 49 PM" src="https://github.com/user-attachments/assets/123df83c-ba03-4e2f-a309-7172a56f3b3c" />
+
+**Version 22**
+
+Agregue la funcion removeLine para poder eliminar el producto del carrito por completo
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-29 at 4 56 58 PM" src="https://github.com/user-attachments/assets/72f199b8-8482-483d-be1c-94f0acabede6" />
