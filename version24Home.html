@@ -1,0 +1,450 @@
+<script>  
+  async function shopifyRequest(query, variables = {}) {
+    const response = await fetch("https://bu1fib-rq.myshopify.com/api/2024-10/graphql.json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": "83e93e5462232411b85e227dad586a69",
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const data = await response.json();
+    return data;
+  }
+
+  async function createCart() {
+    const mutation = `
+      mutation CreateCart($input: CartInput!) {
+        cartCreate(input: $input) {
+          cart {
+            id
+            checkoutUrl
+            createdAt
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+    
+		const variables = {
+      input: {} 
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartCreate.userErrors.length > 0) {
+      console.error("GraphQL Errors:", result.errors || result.data.cartCreate.userErrors);
+      throw new Error("Failed to create cart");
+    }
+    
+    const cart = result.data.cartCreate.cart;
+    const checkoutUrl = cart.checkoutUrl;
+    
+    return {id: cart.id, checkoutUrl : checkoutUrl}
+  }
+  
+  async function getCart(cartId) {
+  	  const query = `
+        query GetCart($cartId: ID!) {
+          cart(id: $cartId) {
+            id
+            createdAt
+            updatedAt
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      product {
+                        title
+                        featuredImage {
+                          url
+                          altText
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            cost {
+              totalAmount {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+      `;
+      
+    const variables = { cartId };
+      
+		const result = await shopifyRequest(query, variables);
+    
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      throw new Error("Failed to fetch cart.");
+  	}
+		
+    console.log("Get Cart", result.data.cart)
+  	return result.data.cart;
+  }
+
+  async function showCart(cartId) {
+    const cart = await getCart(cartId);
+    const cartModal = document.getElementById('cart-modal');
+    
+    const cartItemsContainer = document.getElementById('cart-items');
+    cartItemsContainer.style.display = 'flex';
+    cartItemsContainer.style.flexDirection = 'column';
+    cartItemsContainer.style.maxHeight = '400px';
+    cartItemsContainer.style.overflowY = 'auto';
+    cartItemsContainer.style.overflowX = 'hidden';
+    
+    const emptyCartMessage = document.getElementById('empty-cart-message');
+
+    cartItemsContainer.innerHTML = '';
+    
+    if (!cart || !cart.lines || cart.lines.edges.length === 0) {
+      cartModal.style.display = "flex";
+
+      const cartTotalDiv = document.getElementById('cart-total');
+      if (cartTotalDiv) {
+        cartTotalDiv.textContent = '';
+        cartTotalDiv.style.display = 'none';
+      }
+
+      emptyCartMessage.style.display = 'block';
+      return;
+    } else {
+      emptyCartMessage.style.display = 'none';
+    }
+
+    cart.lines.edges.forEach(edge => {
+      const item = edge.node;
+      const variant = item.merchandise;
+      const product = variant.product;
+
+      const productTitle = product?.title || 'Producto sin nombre';
+      const variantTitle = variant.title || '';
+      const quantity = item.quantity;
+      const price = parseFloat(variant.price.amount);
+      const currency = variant.price.currencyCode;
+      const total = (price * quantity).toFixed(2);
+      const imageUrl = product?.featuredImage?.url || '';
+      const altText = product?.featuredImage?.altText || productTitle;
+
+      const listItem = document.createElement('div');
+      listItem.style.display = 'flex';
+      listItem.style.gap = '15px';
+      listItem.style.padding = '12px';
+      listItem.style.borderBottom = '1px solid #eee';
+      listItem.style.alignItems = 'center';
+
+      if (imageUrl) {
+        const imageDiv = document.createElement('div');
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = altText;
+        img.style.width = '80px';
+        img.style.height = '80px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '6px';
+        imageDiv.appendChild(img);
+        listItem.appendChild(imageDiv);
+      }
+
+      const detailsDiv = document.createElement('div');
+      detailsDiv.style.display = 'flex';
+      detailsDiv.style.flexDirection = 'column';
+      detailsDiv.style.gap = '4px';
+
+      const titleEl = document.createElement('div');
+      titleEl.textContent = productTitle;
+      titleEl.style.fontWeight = 'bold';
+      titleEl.style.fontSize = '16px';
+
+      const variantEl = document.createElement('div');
+      variantEl.textContent = variantTitle;
+      variantEl.style.fontSize = '14px';
+      variantEl.style.color = '#555';
+
+      const quantityWrapper = document.createElement('div');
+      quantityWrapper.style.display = 'flex';
+      quantityWrapper.style.alignItems = 'center';
+      quantityWrapper.style.gap = '8px';
+
+      const minusBtn = document.createElement('button');
+      minusBtn.textContent = '-';
+      minusBtn.style.width = '24px';
+      minusBtn.style.height = '24px';
+      minusBtn.style.cursor = 'pointer';
+      minusBtn.style.fontSize = '16px';
+
+      const quantityDisplay = document.createElement('span');
+      quantityDisplay.textContent = quantity;
+      quantityDisplay.style.fontSize = '14px';
+      quantityDisplay.style.minWidth = '20px';
+      quantityDisplay.style.textAlign = 'center';
+
+      const plusBtn = document.createElement('button');
+      plusBtn.textContent = '+';
+      plusBtn.style.width = '24px';
+      plusBtn.style.height = '24px';
+      plusBtn.style.cursor = 'pointer';
+      plusBtn.style.fontSize = '16px';
+
+      quantityWrapper.appendChild(minusBtn);
+      quantityWrapper.appendChild(quantityDisplay);
+      quantityWrapper.appendChild(plusBtn);
+
+      minusBtn.addEventListener('click', async () => {
+        const newQuantity = item.quantity - 1;
+
+        try {
+          if (newQuantity === 0) {
+            const updatedCart = await removeCartLine(cart.id, item.id);
+            updateCartCounter(updatedCart.totalQuantity);
+            showCart(cart.id);
+          } else {
+            const updatedCart = await updateCartLineQuantity(cart.id, item.id, newQuantity);
+            updateCartCounter(updatedCart.totalQuantity);
+            showCart(cart.id);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      plusBtn.addEventListener('click', async () => {
+        try {
+          const variantStock = await checkVariantStock(variant.id);
+          const available = variantStock?.quantityAvailable || 0;
+          const newQuantity = item.quantity + 1;
+
+          if (newQuantity > available) {
+            alert(`Only ${available} unit${available === 1 ? '' : 's'} available in stock`);
+            return;
+          }
+
+          const updatedCart = await updateCartLineQuantity(cart.id, item.id, newQuantity);
+          updateCartCounter(updatedCart.totalQuantity);
+          showCart(cart.id); 
+        } catch (err) {
+          console.error(err);
+        }
+      });
+      
+      const priceEl = document.createElement('div');
+      priceEl.textContent = `Precio unitario: $${price} ${currency}`;
+      priceEl.style.fontSize = '14px';
+
+      detailsDiv.appendChild(titleEl);
+      detailsDiv.appendChild(variantEl);
+      detailsDiv.appendChild(priceEl);
+      detailsDiv.appendChild(quantityWrapper);
+
+      listItem.appendChild(detailsDiv);
+      cartItemsContainer.appendChild(listItem);
+    });
+
+    const totalAmount = cart.cost.totalAmount.amount;
+    const currency = cart.cost.totalAmount.currencyCode;
+    
+    const cartTotalDiv = document.getElementById('cart-total');
+
+    if (cartTotalDiv) {
+      cartTotalDiv.textContent = `Total del carrito: $${totalAmount} ${currency}`;
+      cartTotalDiv.style.display = 'block';
+      cartTotalDiv.style.fontWeight = 'bold';
+      cartTotalDiv.style.fontSize = '18px';
+      cartTotalDiv.style.marginTop = '24px';
+      cartTotalDiv.style.paddingTop = '12px';
+      cartTotalDiv.style.borderTop = '1px solid #ddd';
+      cartTotalDiv.style.textAlign = 'center';
+    } else {
+      console.warn("No se encontró el div con id 'cart-total'");
+    }
+
+    if (cartModal) {
+      cartModal.style.display = "flex";
+    } else {
+      console.warn("cart-modal no encontrado en el DOM");
+    }
+  }
+
+  function updateCartCounter(count) {
+    const counterEl = document.getElementById('cart-counter');
+    counterEl.textContent = count;
+  }
+  
+  async function updateCartLineQuantity(cartId, lineId, newQuantity) {
+    const mutation = `
+      mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+        cartLinesUpdate(cartId: $cartId, lines: $lines) {
+          cart {
+            id
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      cartId,
+      lines: [
+        {
+          id: lineId,
+          quantity: newQuantity
+        }
+      ]
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartLinesUpdate.userErrors.length > 0) {
+      console.error("Error al actualizar línea:", result.errors || result.data.cartLinesUpdate.userErrors);
+      throw new Error("Error al actualizar cantidad en carrito");
+    }
+
+    return result.data.cartLinesUpdate.cart;
+  }
+  
+  async function removeCartLine(cartId, lineId) {
+    const mutation = `
+      mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+        cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+          cart {
+            id
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      cartId,
+      lineIds: [lineId]
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartLinesRemove.userErrors.length > 0) {
+      console.error("Error al eliminar línea:", result.errors || result.data.cartLinesRemove.userErrors);
+      throw new Error("Error al eliminar producto del carrito");
+    }
+
+    return result.data.cartLinesRemove.cart;
+  }
+
+  
+  async function checkVariantStock(variantId) {
+    const query = `
+      query VariantStockCheck($id: ID!) {
+        node(id: $id) {
+          ... on ProductVariant {
+            id
+            title
+            availableForSale
+            quantityAvailable
+          }
+        }
+      }
+    `;
+
+    const variables = { id: variantId };
+
+    const result = await shopifyRequest(query, variables);
+
+    if (result.errors) {
+      console.error("Error al obtener stock:", result.errors);
+      return null;
+    }
+
+    return result.data.node;
+  }
+
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const cartInfo = await createCart();
+    const cartId = cartInfo.id
+    const checkoutUrl = cartInfo.checkoutUrl
+    window.cartId = cartId;
+    console.log("cartId", cartId);
+    updateCartCounter(0)
+    
+    const cartBtn = document.getElementById('cart-button');
+    const checkoutBtn = document.getElementById('checkout-button');
+
+    cartBtn.addEventListener('click', async () => {
+      showCart(cartId);
+    });
+    
+    checkoutBtn.addEventListener('click', () => {
+      window.location.href = checkoutUrl; 
+    });
+    
+  });
+
+</script>
