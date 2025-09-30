@@ -125,3 +125,9 @@ Volvi scrolleable el carrito
 Antes se añadian productos con 0 en stock y corregi que primero verifique el stock y despues lo muestre
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-29 at 7 04 23 PM" src="https://github.com/user-attachments/assets/dee5cde6-0c8c-4bea-ab3f-cf4010b64878" />
+
+**Version 25**
+
+Cambie la plantilla completa de webflow y pase todo, las cosas que no se programan las hice completas de nuevo, pase el codigo y cambie en el embed el mensaje que va en el div "button"
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-30 at 9 29 22 AM" src="https://github.com/user-attachments/assets/6703a61e-9154-4a21-94d2-0e322863c64f" />
