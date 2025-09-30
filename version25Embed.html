@@ -1,0 +1,241 @@
+<div  
+  class="buy-button"
+  id="buy-button-{{wf {&quot;path&quot;:&quot;variant-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+><p>Buy from {{wf {&quot;path&quot;:&quot;roaster:name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}</p>
+</div>
+<script> 
+  async function shopifyRequest(query, variables = {}) {
+    const response = await fetch("https://bu1fib-rq.myshopify.com/api/2024-10/graphql.json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": "83e93e5462232411b85e227dad586a69",
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const data = await response.json();
+    return data;
+  }
+  
+  async function addItemToCart(cartId, variantId, quantity = 1) {
+
+    const mutation = `
+      mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+        cartLinesAdd(cartId: $cartId, lines: $lines) {
+          cart {
+            id
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      cartId,
+      lines: [
+        {
+          merchandiseId: `gid://shopify/ProductVariant/${variantId}`,
+          quantity
+        }
+      ]
+    };
+
+    const result = await shopifyRequest(mutation, variables);
+
+    if (result.errors || result.data.cartLinesAdd.userErrors.length > 0) {
+      console.error("GraphQL Errors:", result.errors || result.data.cartLinesAdd.userErrors);
+      throw new Error("Failed to add item to cart");
+    }
+		
+    const updatedCart = result.data.cartLinesAdd.cart;
+    console.log("Item added to cart", updatedCart);
+    return updatedCart.totalQuantity;
+  }
+  
+  async function getTotalCount(cartId) {
+  	  const query = `
+        query GetCart($cartId: ID!) {
+          cart(id: $cartId) {
+            id
+            createdAt
+            updatedAt
+            totalQuantity
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      product {
+                        title
+                        featuredImage {
+                          url
+                          altText
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            cost {
+              totalAmount {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+      `;
+      
+    const variables = { cartId };
+      
+		const result = await shopifyRequest(query, variables);
+    
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      throw new Error("Failed to fetch cart.");
+  	}
+		
+    console.log("Get Cart", result.data.cart)
+  	return result.data.cart.totalQuantity;
+  }
+  
+  function showToast(message, type = 'error') {
+    const existingToast = document.getElementById('toast-notification');
+    if (existingToast) {
+      existingToast.remove();
+    }
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-notification';
+    toast.textContent = message;
+
+    toast.style.position = 'fixed';
+    toast.style.top = '30px';
+    toast.style.right = '30px';
+    toast.style.padding = '14px 20px';
+    toast.style.backgroundColor = type === 'error' ? '#ff4d4f' : '#4caf50';
+    toast.style.color = '#fff';
+    toast.style.borderRadius = '8px';
+    toast.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    toast.style.fontSize = '16px';
+    toast.style.zIndex = '9999';
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    toast.style.transform = 'translateY(20px)';
+
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px)';
+      setTimeout(() => {
+        toast.remove();
+      }, 400);
+    }, 3000);
+  }
+  
+  function updateCartCounter(count) {
+    const counterEl = document.getElementById('cart-counter');
+    counterEl.textContent = count;
+  }
+  
+  async function checkVariantStock(variantId) {
+    const query = `
+      query VariantStockCheck($id: ID!) {
+        node(id: $id) {
+          ... on ProductVariant {
+            id
+            title
+            availableForSale
+            quantityAvailable
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      id: variantId
+    };
+
+    const response = await shopifyRequest(query, variables);
+
+    if (response.errors) {
+      console.error("GraphQL Errors:", response.errors);
+      throw new Error("Failed to fetch variant stock");
+    }
+
+    const variant = response.data.node;
+
+    if (!variant) {
+      console.warn("Variant not found");
+      return null;
+    }
+
+    console.log(`🧾 Variant: ${variant.title}`);
+    console.log(`✅ Available for sale: ${variant.availableForSale}`);
+    console.log(`📦 Quantity available: ${variant.quantityAvailable}`);
+
+    return {
+      id: variant.id,
+      title: variant.title,
+      availableForSale: variant.availableForSale,
+      quantityAvailable: variant.quantityAvailable
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    setTimeout( async () => {
+      updateCartCounter(0)
+      console.log("Hey this is cart id", window.cartId);
+
+      const buyButton = document.getElementById(`buy-button-{{wf {&quot;path&quot;:&quot;variant-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`);
+
+      buyButton.addEventListener('click', async () => {
+      	const stock = await checkVariantStock(`gid://shopify/ProductVariant/{{wf {&quot;path&quot;:&quot;variant-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`);
+        	if (!stock || stock.quantityAvailable === 0 || stock.availableForSale === false) {
+          	showToast("Not enough stock for product");
+            return;
+          } 
+        showToast("Product added successfully", "success");
+        const totalCount = await addItemToCart(window.cartId, `{{wf {&quot;path&quot;:&quot;variant-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}`, 1);
+        updateCartCounter(totalCount);
+
+      });
+
+    }, 2000); 
+  });
+
+</script>
