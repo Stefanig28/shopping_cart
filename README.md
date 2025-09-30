@@ -119,3 +119,9 @@ Agregue la funcion removeLine para poder eliminar el producto del carrito por co
 Volvi scrolleable el carrito
 
 <img width="1680" height="1050" alt="Screenshot 2025-09-29 at 6 42 06 PM" src="https://github.com/user-attachments/assets/2dea28c4-4a2f-4090-b83a-86ba49917500" />
+
+**Version 24**
+
+Antes se añadian productos con 0 en stock y corregi que primero verifique el stock y despues lo muestre
+
+<img width="1680" height="1050" alt="Screenshot 2025-09-29 at 7 04 23 PM" src="https://github.com/user-attachments/assets/dee5cde6-0c8c-4bea-ab3f-cf4010b64878" />
